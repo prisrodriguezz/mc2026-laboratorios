@@ -3,7 +3,8 @@ clear;
 
 digitos = input("Ingrese la cantidad de digitos decimales exactos: ");
 
-tolerancia = 10^(-digitos);
+% Cota de error (por redondeo)
+tolerancia = 0.5*10^(-digitos);
 
 suma = 0;
 i = 0;
@@ -54,6 +55,9 @@ printf("Cantidad de digitos: %d\n", digitos);
 printf("Cantidad de terminos necesarios: %d\n", i);
 printf("Pi aproximado: %.15f\n", pi_aprox);
 printf("Pi de referencia: %.15f\n", pi);
-printf("Error absoluto: %.15e\n", error);
-printf("Tiempo de ejecucion: %.6f segundos\n", tiempo);
 
+printf("\n--- CRITERIO DE PARADA ---\n");
+printf("Tolerancia fijada:              %.8e\n", tolerancia);
+printf("Error absoluto final:           %.8e\n", error);
+printf("Margen de parada (Tol - Error): %.8e\n", tolerancia - error);
+printf("\nTiempo de ejecucion:            %.6f segundos\n", tiempo);
