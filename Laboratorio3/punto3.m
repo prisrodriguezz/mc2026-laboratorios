@@ -78,28 +78,41 @@ function punto3()
     end
 
 
-    % ==================================================
-    % GRAFICO
-    % ==================================================
+   % ==================================================
+% GRAFICO
+% ==================================================
 
-    figure;
+fprintf("\nGenerando grafico...\n");
 
-    fplot(@(x) x, [150 250], "LineWidth", 1.5);
-    hold on;
+figure(1);
+clf;
 
-    fplot(g, [150 250], "LineWidth", 1.5);
+x_grafico = linspace(150, 250, 500);
 
-    grid on;
+y1 = x_grafico;
+y2 = arrayfun(g, x_grafico);
 
-    xlabel("Cantidad de unidades (x)");
-    ylabel("y");
+plot(x_grafico, y1, "LineWidth", 1.5);
+hold on;
 
-    title("Metodo de Iteracion - Punto 3");
+plot(x_grafico, y2, "LineWidth", 1.5);
 
-    legend("y = x", "y = g(x)", "Location", "northwest");
+grid on;
 
-    hold off;
+xlabel("Cantidad de unidades (x)");
+ylabel("y");
 
+title("Metodo de Iteracion - Punto 3");
+
+legend("y = x", "y = g(x)");
+
+hold off;
+
+drawnow;
+
+fprintf("Grafico generado.\n");
+fprintf("Presione Enter para continuar...\n");
+pause;
 
     % ==================================================
     % METODO DE ITERACION
