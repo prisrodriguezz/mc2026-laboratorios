@@ -8,14 +8,14 @@ function punto3()
     fprintf(" PUNTO 3 - METODO DE ITERACION Y ACELERACION AITKEN\n");
     fprintf("=====================================================\n");
 
-    % --------------------------------------------------
+    % ==================================================
     % MODELO MATEMATICO
-    % --------------------------------------------------
+    % ==================================================
     %
     % A = 200 * ln(400 / (500 - x))
     % R(x) = 5*x - A
     %
-    % Se desea obtener una utilidad neta de:
+    % Se desea obtener una utilidad neta:
     % R(x) = 1000
     %
     % Entonces:
@@ -41,9 +41,9 @@ function punto3()
     dg = @(x) 40/(500-x);
 
 
-    % --------------------------------------------------
+    % ==================================================
     % DATOS DEL PROBLEMA
-    % --------------------------------------------------
+    % ==================================================
 
     x0 = 200;
     tolerancia = 1e-4;
@@ -65,12 +65,16 @@ function punto3()
     fprintf("|g'(%.4f)| = %.8f\n", x0, derivada);
 
     if derivada < 1
+
         fprintf("Se cumple |g'(x0)| < 1.\n");
-        fprintf("El proceso iterativo es convergente en el entorno considerado.\n");
+        fprintf("El proceso iterativo es convergente.\n");
+
     else
+
         fprintf("No se cumple |g'(x0)| < 1.\n");
-        fprintf("No se garantiza la convergencia del proceso.\n");
+        fprintf("No se garantiza la convergencia.\n");
         return;
+
     end
 
 
@@ -87,13 +91,12 @@ function punto3()
 
     grid on;
 
-    xlabel("x");
+    xlabel("Cantidad de unidades (x)");
     ylabel("y");
 
     title("Metodo de Iteracion - Punto 3");
 
-    legend("y = x", "y = g(x)", ...
-           "Location", "northwest");
+    legend("y = x", "y = g(x)", "Location", "northwest");
 
     hold off;
 
@@ -109,26 +112,27 @@ function punto3()
     tic;
 
     x_anterior = x0;
-
     error = Inf;
     iter = 0;
 
-    fprintf("\nIteracion\t x\t\t\t Error\n");
-    fprintf("------------------------------------------------\n");
-    fprintf("0\t\t %.8f\t\t ---\n", x_anterior);
+    fprintf("\nIteracion\t x\t\t Error\n");
+    fprintf("-----------------------------------------------\n");
+
+    fprintf("0\t\t %.8f\t ---\n", x_anterior);
 
 
     while error >= tolerancia
 
-        % Aplicar x(n+1) = g(xn)
+        % Calcular la siguiente aproximacion
         x_nuevo = g(x_anterior);
 
-        % Error entre aproximaciones consecutivas
+        % Calcular el error
         error = abs(x_nuevo - x_anterior);
 
+        % Aumentar cantidad de iteraciones
         iter = iter + 1;
 
-        fprintf("%d\t\t %.8f\t\t %.8f\n", ...
+        fprintf("%d\t\t %.8f\t %.8f\n", ...
                 iter, x_nuevo, error);
 
         % La nueva aproximacion pasa a ser la anterior
@@ -156,57 +160,49 @@ function punto3()
     x_base = x0;
 
     error_aitken = Inf;
-
     iter_aitken = 0;
 
     fprintf("\nIteracion\t x0\t\t x1\t\t x2\t\t xA\t\t Error\n");
 
-    fprintf("-------------------------------------------------------------------------------\n");
+    fprintf("--------------------------------------------------------------------------------\n");
 
 
     while error_aitken >= tolerancia
 
-        % --------------------------------------------------
-        % Se calculan dos aproximaciones sucesivas mediante
-        % el Metodo de Iteracion
-        % --------------------------------------------------
+        % Se calculan dos aproximaciones sucesivas
+        % utilizando el Metodo de Iteracion
 
         x1 = g(x_base);
 
         x2 = g(x1);
 
 
-        % --------------------------------------------------
-        % Formula Delta-cuadrado de Aitken
-        %
-        % xA = x2 - (x2-x1)^2 /
-        %            (x2 - 2*x1 + x0)
-        % --------------------------------------------------
+        % Denominador de la formula de Aitken
 
         denominador = x2 - 2*x1 + x_base;
 
 
-        % Evitar una division por cero
+        % Verificar que el denominador no sea cero
+
         if abs(denominador) < eps
 
             fprintf("\nEl denominador de Aitken es demasiado pequeno.\n");
-
             break;
 
         end
 
 
-        x_acelerado = x2 - ...
-            ((x2 - x1)^2 / denominador);
+        % Formula Delta-Cuadrado de Aitken
+
+        x_acelerado = x2 - ((x2 - x1)^2 / denominador);
 
 
-        % --------------------------------------------------
-        % Criterio de parada
-        % Se compara la aproximacion acelerada con
-        % la aproximacion inicial de esta etapa.
-        % --------------------------------------------------
+        % Calcular el error
 
         error_aitken = abs(x_acelerado - x_base);
+
+
+        % Aumentar cantidad de aplicaciones de Aitken
 
         iter_aitken = iter_aitken + 1;
 
@@ -220,9 +216,8 @@ function punto3()
                 error_aitken);
 
 
-        % Si todavia no se alcanzo la tolerancia,
-        % la aproximacion obtenida mediante Aitken
-        % pasa a ser el nuevo punto inicial.
+        % La aproximacion acelerada pasa a ser
+        % el nuevo punto inicial
 
         x_base = x_acelerado;
 
@@ -243,7 +238,7 @@ function punto3()
     fprintf("=====================================================\n");
 
 
-    fprintf("\nMETODO DE ITERACION\n");
+    fprintf("\nMETODO DE ITERACION:\n");
 
     fprintf("Raiz aproximada: %.8f\n", raiz_iteracion);
 
@@ -255,7 +250,7 @@ function punto3()
             tiempo_iteracion);
 
 
-    fprintf("\nMETODO DE ITERACION + AITKEN\n");
+    fprintf("\nMETODO DE ITERACION + AITKEN:\n");
 
     fprintf("Raiz aproximada: %.8f\n", raiz_aitken);
 
@@ -276,16 +271,18 @@ function punto3()
     fprintf(" VERIFICACION\n");
     fprintf("========================================\n");
 
+
     fprintf("f(x) utilizando Iteracion = %.10f\n", ...
             f(raiz_iteracion));
 
-    fprintf("f(x) utilizando Aitken    = %.10f\n", ...
+    fprintf("f(x) utilizando Aitken = %.10f\n", ...
             f(raiz_aitken));
 
 
-    % Calcular la utilidad obtenida
+    % Calcular el gasto en publicidad
     A = 200*log(400/(500-raiz_aitken));
 
+    % Calcular la utilidad neta
     R = 5*raiz_aitken - A;
 
 
