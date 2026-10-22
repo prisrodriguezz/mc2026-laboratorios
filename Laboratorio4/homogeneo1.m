@@ -9,6 +9,16 @@ function homogeneo1()
     A = [3, 2, -1;
          1,-2,  3;
          2, 0,  4];
+    cambiar = input('Desea ingresar otra matriz A? (1=Si, 0=No): ');
+    if cambiar == 1
+        A = input('Ingrese la matriz cuadrada A, por ejemplo [3 2 -1; 1 -2 3; 2 0 4]: ');
+    elseif cambiar ~= 0
+        error('Opcion no valida.');
+    end
+    n = size(A,1);
+    if n < 2 || size(A,2) ~= n || ~isnumeric(A) || any(~isfinite(A(:)))
+        error('A debe ser una matriz cuadrada de orden mayor o igual a 2.');
+    end
     fprintf('Matriz A del sistema:\n');
     disp(A);
     fprintf('Pulse Enter para aplicar Faddeev-Leverrier...\n');
@@ -20,8 +30,16 @@ function homogeneo1()
     fprintf('-------------------------------------------------------\n');
     fprintf('Coeficientes del polinomio caracteristico:\n');
     disp(coef);
-    fprintf('Polinomio: lambda^3 + (%.6f)lambda^2 + (%.6f)lambda + (%.6f) = 0\n', ...
-            coef(2), coef(3), coef(4));
+    fprintf('Polinomio caracteristico (coeficientes de mayor a menor grado):\n');
+    disp(coef);
+    fprintf('P(lambda) = ');
+    for j = 1:length(coef)
+        grado = n-j+1;
+        if j > 1, fprintf(' %+.6g', coef(j)); else, fprintf('%.6g', coef(j)); end
+        if grado > 1, fprintf('*lambda^%d', grado);
+        elseif grado == 1, fprintf('*lambda'); end
+    end
+    fprintf(' = 0\n');
 
     % Las raices del polinomio son los autovalores.
     autovalores = roots(coef);

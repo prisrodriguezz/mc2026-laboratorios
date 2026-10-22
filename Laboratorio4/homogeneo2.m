@@ -12,6 +12,19 @@ function homogeneo2()
         -1, 2,-1;
          0,-1, 2];
     D = diag([1,2,3]);
+    cambiar = input('Desea ingresar otros datos del sistema? (1=Si, 0=No): ');
+    if cambiar == 1
+        K = input('Ingrese la matriz K de 3x3: ');
+        masas = input('Ingrese las 3 masas relativas [m1;m2;m3]: ');
+        masas = masas(:);
+        if ~isequal(size(K),[3,3]) || length(masas) ~= 3 || ...
+           any(masas <= 0) || any(~isfinite(masas)) || any(~isfinite(K(:)))
+            error('Se requiere K de 3x3 y tres masas positivas.');
+        end
+        D = diag(masas);
+    elseif cambiar ~= 0
+        error('Opcion no valida.');
+    end
     A = D\K;
 
     fprintf('a. MATRIZ A DEL SISTEMA A*x = lambda*x:\n');
@@ -42,6 +55,13 @@ function homogeneo2()
     fprintf('c. METODO DE LAS POTENCIAS - 4 ITERACIONES\n');
     fprintf('-------------------------------------------------------\n');
     x0 = [1; 1; -0.5];
+    if cambiar == 1
+        x0 = input('Ingrese vector inicial de 3 componentes (ejemplo [1;1;-0.5]): ');
+        x0 = x0(:);
+        if length(x0) ~= 3 || any(~isfinite(x0)) || norm(x0,inf) == 0
+            error('El vector inicial debe tener tres componentes y no ser nulo.');
+        end
+    end
     [lambda_aprox, x_aprox, tiempo_pot] = metodo_potencias(A,x0,4);
 
     lambda_exacto = valores(3);

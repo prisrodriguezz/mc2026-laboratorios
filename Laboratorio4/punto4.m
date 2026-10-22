@@ -13,16 +13,41 @@ function punto4()
          2,   1, 3];
     b = [960; 510; 610];
 
-    fprintf('Matriz de coeficientes y suministros del ejemplo:\n');
-    disp([A, b]);
-    cambiar = input('Desea ingresar otros suministros? (1=Si, 0=No): ');
-    if cambiar == 1
+    fprintf('Opciones de prueba:\n');
+    fprintf('1 - Ejemplo original (3x3)\n');
+    fprintf('2 - Cambiar solo los suministros del ejemplo\n');
+    fprintf('3 - Ingresar matriz A y vector b de cualquier dimension\n');
+    fprintf('4 - Ejemplo de prueba 2x2\n');
+    fprintf('5 - Ejemplo de prueba 4x4\n');
+    opcion = input('Seleccione una opcion (1 a 5): ');
+    if opcion == 2
         b = input('Ingrese [cobre; zinc; vidrio], por ejemplo [960;510;610]: ');
-        b = b(:);
+    elseif opcion == 3
+        n = input('Ingrese la dimension n del sistema: ');
+        if ~isscalar(n) || n < 2 || n ~= fix(n)
+            error('La dimension debe ser un entero mayor o igual a 2.');
+        end
+        A = input('Ingrese la matriz A, por ejemplo [4 1; 2 3]: ');
+        b = input('Ingrese el vector b, por ejemplo [9; 8]: ');
+    elseif opcion == 4
+        A = [4, 1; 2, 3];
+        b = [9; 8];  % Solucion: [1.9; 1.4]
+    elseif opcion == 5
+        A = [10, 1, 1, 1; 1, 10, 1, 1; 1, 1, 10, 1; 1, 1, 1, 10];
+        b = [19; 28; 37; 46];  % Solucion: [1; 2; 3; 4]
+    elseif opcion ~= 1
+        error('Opcion no valida.');
     end
-    if length(b) ~= 3
-        error('Se requieren tres cantidades de materiales.');
+    b = b(:);
+    n = size(A,1);
+    if size(A,2) ~= n || length(b) ~= n || ~isnumeric(A) || ~isnumeric(b)
+        error('A debe ser cuadrada y b debe tener n componentes.');
     end
+    if any(~isfinite(A(:))) || any(~isfinite(b))
+        error('Los datos deben ser numeros finitos.');
+    end
+    fprintf('Matriz ampliada utilizada:\n');
+    disp([A,b]);
 
     fprintf('Pulse Enter para aplicar los cuatro metodos...\n');
     pause;
@@ -43,7 +68,7 @@ function punto4()
         fprintf('La convergencia no esta garantizada; se verificara el residuo.\n');
     end
     disp([As, bs]);
-    x0 = zeros(3,1);
+    x0 = zeros(n,1);
     tol = 1e-6;
     max_iter = 1000;
     [xs, iter, err, ts, convergio] = gauss_seidel(As, bs, x0, tol, max_iter);
@@ -51,9 +76,13 @@ function punto4()
     fprintf('\n=======================================================\n');
     fprintf('                 RESULTADOS FINALES\n');
     fprintf('=======================================================\n');
-    nombres = {'Transistores', 'Resistores', 'Chips'};
+    if opcion <= 2
+        nombres = {'Transistores', 'Resistores', 'Chips'};
+    else
+        nombres = arrayfun(@(i) sprintf('x%d',i), 1:n, 'UniformOutput', false);
+    end
     fprintf('                    Gauss      Jordan       LU        Seidel\n');
-    for i = 1:3
+    for i = 1:n
         fprintf('%-13s %10.4f %10.4f %10.4f %10.4f\n', ...
                 nombres{i}, xg(i), xj(i), xl(i), xs(i));
     end
@@ -73,11 +102,11 @@ function punto4()
     else
         fprintf('- Gauss-Seidel no alcanzo la tolerancia.\n');
     end
-    if any(xg < 0)
+    if opcion <= 2 && any(xg < 0)
         fprintf('ADVERTENCIA: la solucion contiene cantidades negativas.\n');
         fprintf('No representa una produccion fisicamente posible.\n');
     end
-    if any(abs(xg-round(xg)) > 1e-8)
+    if opcion <= 2 && any(abs(xg-round(xg)) > 1e-8)
         fprintf('OBSERVACION: hay cantidades no enteras de componentes.\n');
     end
     fprintf('=======================================================\n');
@@ -174,6 +203,10 @@ function [Ar, br, dominante] = reordenar_filas(A,b)
     Ar = A;
     br = b;
     dominante = false;
+    if n > 7
+        fprintf('Se omite la busqueda exhaustiva de permutaciones para n > 7.\n');
+        return;
+    end
     perm = perms(1:n);
     for p = 1:size(perm,1)
         Ap = A(perm(p,:),:);
