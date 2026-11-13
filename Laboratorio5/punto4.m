@@ -2,28 +2,62 @@
 function punto4()
 
     clc;
-    clear;
 
     printf("========================\n");
     printf(" RESOLUCION EJERCICIO 4 \n");
     printf("========================\n");
 
-    % Datos experimentales
-    x = [102, 245, 327, 423, 565];
-    y = [0.564642, 0.642218, 0.717356, 0.783327, 0.853329];
+    % =====================================================
+    % INGRESO DE DATOS
+    % =====================================================
 
-    x_buscado = 275;
+    fprintf('\nIngrese los datos experimentales.\n');
 
-    fprintf('Datos tabulares cargados:\n');
+    x = input('Ingrese el vector de temperaturas: ');
+    y = input('Ingrese el vector de densidades: ');
+
+    % Convertir los vectores a filas
+    x = x(:)';
+    y = y(:)';
+
+    % Determinar dimensiones
+    [~, nx] = size(x);
+    [~, ny] = size(y);
+
+    % Validar los datos ingresados
+    if nx ~= ny || nx < 4
+        error('Se requieren al menos 4 puntos y vectores de igual longitud.');
+    end
+
+    if ~isnumeric(x) || ~isnumeric(y) || ...
+       ~isreal(x) || ~isreal(y) || ...
+       any(~isfinite(x)) || any(~isfinite(y))
+        error('Todos los datos deben ser numeros reales y finitos.');
+    end
+
+    if any(diff(x) <= 0)
+        error('Las temperaturas deben ser distintas y crecientes.');
+    end
+
+    x_buscado = input('Ingrese la temperatura a interpolar: ');
+
+    if ~isnumeric(x_buscado) || ~isreal(x_buscado) || ...
+       ~isscalar(x_buscado) || ~isfinite(x_buscado)
+        error('La temperatura buscada debe ser un numero real finito.');
+    end
+
+    fprintf('\nDatos tabulares cargados:\n');
     fprintf('Temperatura | Densidad\n');
     disp([x', y']);
 
-    fprintf('\nPulsar "Enter" para aplicar Lagrange...\n');
-    pause;
+    fprintf('\nCantidad de puntos: %d\n', nx);
 
     % =====================================================
-    % INCISO A - INTERPOLACION DE LAGRANGE
+    % INCISO A - METODO DE LAGRANGE
     % =====================================================
+
+    fprintf('\nPulsar "Enter" para aplicar Lagrange...\n');
+    pause;
 
     printf("\n-------------------------------------------------------\n");
     printf("a. INTERPOLACION MEDIANTE LAGRANGE\n");
@@ -34,19 +68,20 @@ function punto4()
 
     fprintf('\nTemperatura: %.2f\n', x_buscado);
     fprintf('Densidad interpolada: %.8f\n', y_lagrange);
-
-    fprintf('\nPulsar "Enter" para aplicar interpolacion parabolica...\n');
-    pause;
+    fprintf('Tiempo: %.8f segundos\n', tiempo_lagrange);
 
     % =====================================================
     % INCISO B - INTERPOLACION PARABOLICA PROGRESIVA
     % =====================================================
 
+    fprintf('\nPulsar "Enter" para aplicar interpolacion parabolica...\n');
+    pause;
+
     printf("\n-------------------------------------------------------\n");
     printf("b. INTERPOLACION PARABOLICA PROGRESIVA\n");
     printf("-------------------------------------------------------\n");
 
-    % Se utilizan los primeros tres puntos
+    % Seleccionamos los primeros tres puntos
     x_par = x(1:3);
     y_par = y(1:3);
 
@@ -57,40 +92,71 @@ function punto4()
     disp([x_par', y_par']);
 
     fprintf('\nDensidad interpolada: %.8f\n', y_parabolica);
+    fprintf('Tiempo: %.8f segundos\n', tiempo_parabolica);
 
-    % Diferencia entre las aproximaciones
-    error_abs = abs(y_lagrange - y_parabolica);
-    error_rel = (error_abs / abs(y_lagrange)) * 100;
+    % =====================================================
+    % COMPARACION DE LOS METODOS
+    % =====================================================
+
+    diferencia_abs = abs(y_lagrange - y_parabolica);
+
+    if y_lagrange ~= 0
+        diferencia_rel = ...
+            (diferencia_abs / abs(y_lagrange)) * 100;
+    else
+        diferencia_rel = NaN;
+    end
 
     fprintf('\nComparacion entre ambos metodos:\n');
-    fprintf('Diferencia absoluta: %.8f\n', error_abs);
-    fprintf('Diferencia relativa: %.6f %%\n', error_rel);
+    fprintf('Diferencia absoluta: %.8f\n', diferencia_abs);
+    fprintf('Diferencia relativa: %.6f %%\n', diferencia_rel);
 
-    % Estimacion del error de interpolacion parabolica
-    % mediante el primer termino omitido de Newton
+    % =====================================================
+    % ESTIMACION DEL ERROR
+    % =====================================================
 
+    % Primer termino omitido del polinomio cuadratico
     error_estimado = estimar_error( ...
         x(1:4), y(1:4), x_buscado);
 
     fprintf('\nEstimacion del error de interpolacion:\n');
-    fprintf('Error estimado: %.8f\n', error_estimado);
+    fprintf('Primer termino omitido: %.8f\n', error_estimado);
+
+    % =====================================================
+    % PRUEBA ADICIONAL - POLINOMIO CUBICO
+    % =====================================================
+
+    fprintf('\nPulsar "Enter" para comparar con cuatro puntos...\n');
+    pause;
+
+    printf("\n-------------------------------------------------------\n");
+    printf(" PRUEBA ADICIONAL - POLINOMIO CUBICO DE NEWTON\n");
+    printf("-------------------------------------------------------\n");
+
+    % Incorporar un cuarto punto mediante el termino cubico
+    termino_cubico = termino_newton_3( ...
+        x(1:4), y(1:4), x_buscado);
+
+    y_cubica = y_parabolica + termino_cubico;
+
+    diferencia_grados = abs(y_cubica - y_parabolica);
+
+    fprintf('\nParabolica (3 puntos): %.8f\n', y_parabolica);
+    fprintf('Cubica (4 puntos):     %.8f\n', y_cubica);
+    fprintf('Diferencia absoluta:   %.8f\n', diferencia_grados);
+
+    % =====================================================
+    % INCISO C - RESULTADOS Y CONCLUSIONES
+    % =====================================================
 
     fprintf('\nPulsar "Enter" para ver las conclusiones...\n');
     pause;
 
-    % =====================================================
-    % INCISO C - ANALISIS Y CONCLUSIONES
-    % =====================================================
+    printf("\n======================================================\n");
+    printf("                 RESULTADOS FINALES\n");
+    printf("======================================================\n");
 
-    printf("\n-------------------------------------------------------\n");
-    printf("c. ANALISIS Y CONCLUSIONES\n");
-    printf("-------------------------------------------------------\n");
-
-    fprintf('\n======================================================\n');
-    fprintf('                 RESULTADOS FINALES                   \n');
-    fprintf('======================================================\n');
-
-    fprintf('INCISO A - LAGRANGE:\n');
+    fprintf('\nINCISO A - LAGRANGE:\n');
     fprintf('- Densidad: %.8f\n', y_lagrange);
     fprintf('- Tiempo: %.8f segundos\n', tiempo_lagrange);
 
@@ -99,35 +165,33 @@ function punto4()
     fprintf('- Tiempo: %.8f segundos\n', tiempo_parabolica);
 
     fprintf('\nCOMPARACION ENTRE METODOS:\n');
-    fprintf('- Diferencia absoluta: %.8f\n', error_abs);
-    fprintf('- Diferencia relativa: %.6f %%\n', error_rel);
+    fprintf('- Diferencia absoluta: %.8f\n', diferencia_abs);
+    fprintf('- Diferencia relativa: %.6f %%\n', diferencia_rel);
 
     fprintf('\nESTIMACION DEL ERROR:\n');
     fprintf('- Primer termino omitido: %.8f\n', error_estimado);
 
-    fprintf('======================================================\n');
+    fprintf('\nPRUEBA ADICIONAL CON CUATRO PUNTOS:\n');
+    fprintf('- Aproximacion cubica: %.8f\n', y_cubica);
+    fprintf('- Cambio respecto a parabolica: %.8f\n', diferencia_grados);
+
+    printf("======================================================\n");
 
     fprintf('\nCONCLUSION:\n');
     fprintf('Ambos metodos permiten estimar la densidad\n');
-    fprintf('correspondiente a una temperatura de 275 grados.\n');
-    fprintf('Lagrange utiliza los cinco puntos disponibles,\n');
-    fprintf('mientras que la interpolacion parabolica utiliza tres.\n');
-    fprintf('Los resultados son cercanos, aunque no identicos.\n');
-    fprintf('La estimacion del error se obtuvo mediante\n');
-    fprintf('el primer termino omitido del polinomio de Newton.\n');
-    fprintf('Este valor no representa necesariamente el error real,\n');
-    fprintf('ya que no se conoce la densidad exacta a 275 grados.\n');
+    fprintf('correspondiente a la temperatura solicitada.\n');
+    fprintf('Lagrange utiliza todos los puntos disponibles,\n');
+    fprintf('mientras que la parabolica utiliza tres.\n');
+    fprintf('Se compararon las aproximaciones y el efecto\n');
+    fprintf('de incorporar un cuarto punto al polinomio de Newton.\n');
+    fprintf('El primer termino omitido no representa\n');
+    fprintf('necesariamente el error verdadero de interpolacion.\n');
 
 end
 
 
 % =========================================================
-% FUNCIONES AUXILIARES
-% =========================================================
-
-
-% =========================================================
-% METODO DE INTERPOLACION DE LAGRANGE
+% FUNCION AUXILIAR - METODO DE LAGRANGE
 % =========================================================
 
 function [y_interp, tiempo] = metodo_lagrange(x, y, x_buscado)
@@ -160,11 +224,11 @@ end
 
 
 % =========================================================
-% INTERPOLACION PARABOLICA PROGRESIVA
-% Diferencias divididas de Newton
+% FUNCION AUXILIAR - INTERPOLACION PARABOLICA
 % =========================================================
 
-function [y_interp, tiempo] = interpolacion_parabolica(x, y, x_buscado)
+function [y_interp, tiempo] = ...
+    interpolacion_parabolica(x, y, x_buscado)
 
     tic;
 
@@ -175,7 +239,7 @@ function [y_interp, tiempo] = interpolacion_parabolica(x, y, x_buscado)
     % Segunda diferencia dividida
     d012 = (d12 - d01) / (x(3) - x(1));
 
-    % Polinomio interpolante de segundo grado
+    % Polinomio de segundo grado
     y_interp = y(1) + ...
         d01 * (x_buscado - x(1)) + ...
         d012 * (x_buscado - x(1)) * ...
@@ -187,11 +251,10 @@ end
 
 
 % =========================================================
-% ESTIMACION DEL ERROR DE INTERPOLACION
-% Primer termino omitido del polinomio de Newton
+% FUNCION AUXILIAR - TERMINO CUBICO DE NEWTON
 % =========================================================
 
-function error_estimado = estimar_error(x, y, x_buscado)
+function termino = termino_newton_3(x, y, x_buscado)
 
     % Primeras diferencias divididas
     d01 = (y(2) - y(1)) / (x(2) - x(1));
@@ -205,10 +268,23 @@ function error_estimado = estimar_error(x, y, x_buscado)
     % Tercera diferencia dividida
     d0123 = (d123 - d012) / (x(4) - x(1));
 
-    % Primer termino omitido del polinomio cuadratico
-    error_estimado = abs(d0123 * ...
+    % Termino de tercer grado
+    termino = d0123 * ...
         (x_buscado - x(1)) * ...
         (x_buscado - x(2)) * ...
-        (x_buscado - x(3)));
+        (x_buscado - x(3));
+
+end
+
+
+% =========================================================
+% FUNCION AUXILIAR - ESTIMACION DEL ERROR
+% =========================================================
+
+function error_estimado = estimar_error(x, y, x_buscado)
+
+    termino = termino_newton_3(x, y, x_buscado);
+
+    error_estimado = abs(termino);
 
 end
